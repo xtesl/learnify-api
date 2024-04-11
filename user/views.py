@@ -37,8 +37,6 @@ class CreateUser(APIView):
         
 
 
-
-
 class Login(APIView):
 	authentication_classes = []
 	permission_classes = [AllowAny]
