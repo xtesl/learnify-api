@@ -23,7 +23,7 @@ class CreateUser(APIView):
 			subject = 'Confirmation Code'
 			message = f"User's code is: {otp}, please follow this link to confirm user i.e {user_email}: https://learnify-confirm-page.onrender.com"
 			from_ = 'Vyndly <noreply@example.com>'
-			recipient_list = [user_email]
+			recipient_list = ["r00399544@gmail.com"]
 			send_mail(
                 subject=subject,
                 message=message,
