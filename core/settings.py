@@ -36,7 +36,8 @@ AUTHENTICATION_BACKENDS = [
 
 CORS_ALLOWED_ORIGINS = [
     'https://learnify-confirm-page.onrender.com',
-    'https://learnify-register.onrender.com'
+    'https://learnify-register.onrender.com',
+    'https://learnify-register-1.onrender.com',
 ]
 
 
