@@ -2,11 +2,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from django.contrib.auth import authenticate
 from django.core.mail import send_mail
+from firebase_admin import firestore
+
+db_client = firestore.client()
 
 from .serializers import UserSerializer
 from .models import User
+import random
 
 class CreateUser(APIView):
 	permission_classes = [AllowAny]
@@ -14,11 +17,16 @@ class CreateUser(APIView):
 	
 	def post(self, request, *args, **kwargs):
 		userSerializer = UserSerializer(data=request.data)
-
+		
 		if userSerializer.is_valid():
+			doc_ref = db_client.collection('users').document()
+			data = userSerializer.validated_data
+			data['activated'] = False
+			otp = str(random.randint(10000, 999999))
+			data['otp'] = otp
+			doc_ref.set(data)
 			userSerializer.save()
 
-			otp = userSerializer.data.get('otp')
 			user_email = request.data.get('email')
 			subject = 'Confirmation Code'
 			message = f"User's code is: {otp}, please follow this link to confirm user i.e {user_email}: https://learnify-confirm-page.onrender.com"
@@ -44,13 +52,17 @@ class Login(APIView):
 	def post(self, request, *args, **kwargs):
 		email = request.data.get('email')
 		password = request.data.get('password')
-		authenticated_user = authenticate(request, username=email, password=password)
+		user = db_client.collection('users').where('email', '==', email).limit(1).get()
 
-		if authenticated_user and authenticated_user.activated:
-			return Response({'message': "Login successful"})
+		if user:
+			user_data = user[0].to_dict()
+			db_password = user_data.get('password')
+			activated = user_data.get('activated')
+			if password == db_password and activated:
+				return Response(status=status.HTTP_200_OK)
+			return Response(status=status.HTTP_401_UNAUTHORIZED)
 		else:
-			return Response({'message':'An error occurred while trying to login, please try again later'},
-				status=status.HTTP_401_UNAUTHORIZED)
+			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -64,16 +76,18 @@ class ConfirmUser(APIView):
 		email = request.data.get('email')
 
 		try:
-			user = User.objects.get(email=email)
+			user = db_client.collection('users').where('email', '==', email).limit(1).get()
+			print(user)
+			if user:
+				db_otp = user[0].to_dict().get('otp')
+				if db_otp == otp:
+					doc = user[0]
+					doc.reference.update({
+						'activated': True
+					})
+					return Response(status=status.HTTP_200_OK)
+				else:
+					return Response(status=status.HTTP_401_UNAUTHORIZED)
+		except Exception as e:
 			
-			if user.otp == otp:
-				user.activated = True
-				user.save()
-				return Response({'message': 'User activated'})
-			else:
-				return Response({'message': 'Wrong otp'}, status=status.HTTP_401_UNAUTHORIZED)
-		except User.DoesNotExist:
-			return Response({'messag': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-		
-
-
+			return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
