@@ -10,10 +10,18 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+#fire base datastore setup
+import firebase_admin
+from firebase_admin import credentials
+cred = credentials.Certificate(r"./serviceAccount.json")
+firebase_admin.initialize_app(cred)
 
 
 # Quick-start development settings - unsuitable for production
@@ -36,8 +44,8 @@ AUTHENTICATION_BACKENDS = [
 
 CORS_ALLOWED_ORIGINS = [
     'https://learnify-confirm-page.onrender.com',
-    'https://learnify-register.onrender.com',
     'https://learnify-register-1.onrender.com',
+   'https://learnify-register.onrender.com'
 ]
 
 
@@ -93,6 +101,8 @@ TEMPLATES = [
         },
     },
 ]
+
+
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
