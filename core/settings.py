@@ -32,9 +32,9 @@ firebase_admin.initialize_app(cred)
 SECRET_KEY = 'django-insecure-t+^736=s@pf7=o@9(7l*#&i^f-ssa7x6%=(2lfi0)^j=84vr8o'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['.vercel.app','now.sh','127.0.0.1','localhost']
 
 AUTH_USER_MODEL = 'user.User'
 
