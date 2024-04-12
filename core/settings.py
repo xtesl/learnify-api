@@ -20,7 +20,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #fire base datastore setup
 import firebase_admin
 from firebase_admin import credentials
-cred = credentials.Certificate("serviceAccount.json")
+service_account_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "serviceAccount.json")
+cred = credentials.Certificate(service_account_file)
 firebase_admin.initialize_app(cred)
 
 
